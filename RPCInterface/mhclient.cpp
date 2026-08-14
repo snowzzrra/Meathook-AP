@@ -48,7 +48,7 @@ DWORD WINAPI MeathookInterface::KeepAlive(LPVOID Data)
         RpcTryExcept
         {
             int x;
-            ::KeepAlive(meathook_interface_v1_0_c_ifspec, &x);
+            ::KeepAlive(&x);
             pthis->m_Initialized = true;
         }
         RpcExcept(1)
@@ -76,13 +76,13 @@ bool MeathookInterface::GetSpawnInfo(unsigned char* pBuffer)
     {
         if (pBuffer != nullptr) {
             int Size = (int)sizeof(m_SpawnInfoBuffer);
-            ::GetSpawnInfo(meathook_interface_v1_0_c_ifspec, &Size, (unsigned char*) m_SpawnInfoBuffer);
+            ::GetSpawnInfo(&Size, (unsigned char*) m_SpawnInfoBuffer);
             strcpy_s((char*)pBuffer, 256, m_SpawnInfoBuffer);
             m_Initialized = true;
 
         } else {
             int Size = 0;
-            ::GetSpawnInfo(meathook_interface_v1_0_c_ifspec, &Size, 0);
+            ::GetSpawnInfo(&Size, 0);
         }
         return true;
     }
@@ -101,7 +101,7 @@ bool MeathookInterface::GetEntitiesFile(unsigned char* pBuffer, size_t *Size)
     RpcTryExcept
     {
         int TempSize = (int)*Size;
-        ::GetEntitiesFile(meathook_interface_v1_0_c_ifspec, &TempSize, pBuffer);
+        ::GetEntitiesFile(&TempSize, pBuffer);
         *Size = TempSize;
         return true;
     }
@@ -120,17 +120,17 @@ bool MeathookInterface::PushEntitiesFile(char* pFileName, char *pBuffer, int Siz
     RpcTryExcept
     {
         //MaxSize =  4194296 (0x3FFFF8) RPC interface hangs with anything above this size.
-        ::PushEntitiesFile(meathook_interface_v1_0_c_ifspec, (unsigned char*)pFileName, true, 0);
+        ::PushEntitiesFile((unsigned char*)pFileName, true, 0);
         // int TotalSize = Size;
         // int ChunkSize = 500000;
         // int Offset = 0;
         // while (TotalSize > 0) {
-        //     ::UploadData(meathook_interface_v1_0_c_ifspec, ChunkSize, Offset, (unsigned char*)(pBuffer + Offset));
+        //     ::UploadData(ChunkSize, Offset, (unsigned char*)(pBuffer + Offset));
         //     TotalSize -= ChunkSize;
         //     Offset += ChunkSize;
         // }
         // 
-        // ::PushEntitiesFile(meathook_interface_v1_0_c_ifspec, (unsigned char*)pFileName, false, Size);
+        // ::PushEntitiesFile((unsigned char*)pFileName, false, Size);
         return true;
     }
     RpcExcept(1)
@@ -147,7 +147,7 @@ bool MeathookInterface::ExecuteConsoleCommand(unsigned char* pszString)
 {
     RpcTryExcept
     {
-        ::ExecuteConsoleCommand(meathook_interface_v1_0_c_ifspec, pszString);
+        ::ExecuteConsoleCommand(pszString);
         return true;
     }
     RpcExcept(1)
@@ -166,7 +166,7 @@ bool MeathookInterface::DestroyRpcInterface() {
         return status;
     }
 
-    status = RpcBindingFree(&meathook_interface_v1_0_c_ifspec);
+    status = RpcBindingFree(&meathook_interface__MIDL_AutoBindHandle);
     if (status != 0) {
         return status;
     }
@@ -178,7 +178,7 @@ bool MeathookInterface::GetActiveEncounter(int *Size, char* pBuffer)
 {
     RpcTryExcept
     {
-        ::GetActiveEncounter(meathook_interface_v1_0_c_ifspec, Size, (unsigned char*)pBuffer);
+        ::GetActiveEncounter(Size, (unsigned char*)pBuffer);
         return true;
     }
     RpcExcept(1)
@@ -196,7 +196,7 @@ bool MeathookInterface::GetCurrentCheckpoint(int* Size, char* pBuffer)
 {
     RpcTryExcept
     {
-        ::GetCurrentCheckpoint(meathook_interface_v1_0_c_ifspec, Size, (unsigned char*)pBuffer);
+        ::GetCurrentCheckpoint(Size, (unsigned char*)pBuffer);
         return true;
     }
     RpcExcept(1)
@@ -233,7 +233,7 @@ bool MeathookInterface::InitializeRpcInterface()
         return status;
     }
 
-    status = RpcBindingFromStringBindingA(pszStringBinding, &meathook_interface_v1_0_c_ifspec);
+    status = RpcBindingFromStringBindingA(pszStringBinding, &meathook_interface__MIDL_AutoBindHandle);
     if (status != 0) {
         return status;
     }

@@ -20,6 +20,7 @@
 #include "idLib.hpp"
 #include "idStr.hpp"
 #include "clipboard_helpers.hpp"
+#include "mh_ap_runtime.hpp"
 
 class RpcServer
 {
@@ -80,13 +81,11 @@ void __RPC_USER midl_user_free(void __RPC_FAR* ptr)
 const static RpcServer gRpcServer;
 
 void KeepAlive(
-    /* [in] */ handle_t IDL_handle,
     /* [string][in] */ int* Size)
 {
 }
 
 void ExecuteConsoleCommand(
-    /* [in] */ handle_t IDL_handle,
     /* [string][in] */ unsigned char* pszString
     )
 {
@@ -95,7 +94,6 @@ void ExecuteConsoleCommand(
 
 extern std::vector<std::string> gActiveEncounterNames;
 void GetActiveEncounter(
-    /* [in] */ handle_t IDL_handle,
     /* [string][in] */ int *Size,
     /* [string][in] */ unsigned char* pszString
     )
@@ -133,7 +131,6 @@ char gOverrideBuffer[256];
 const char* gOverrideFileName = nullptr;
 unsigned long long gBufferReload = 0;
 void PushEntitiesFile(
-    /* [in] */ handle_t IDL_handle,
     /* [size_is][in] */ unsigned char* pBuffer,
     boolean Start,
     int Size)
@@ -152,7 +149,6 @@ void PushEntitiesFile(
 }
 
 void UploadData(
-    /* [in] */ handle_t IDL_handle,
     /* [in] */ int Size,
     /* [in] */ int Offset,
     /* [size_is][in] */ unsigned char* pBuffer)
@@ -160,7 +156,6 @@ void UploadData(
 }
 
 void GetEntitiesFile(
-    /* [in] */ handle_t IDL_handle,
     /* [out][in] */ int* Size,
     /* [size_is][out] */ unsigned char* pBuffer)
 {
@@ -180,7 +175,6 @@ void GetEntitiesFile(
 
 void cmd_mh_spawninfo(idCmdArgs* args);
 void GetSpawnInfo(
-    /* [in] */ handle_t IDL_handle,
     /* [out][in] */ int* Size,
     /* [size_is][out] */ unsigned char* pBuffer)
 {
@@ -193,19 +187,66 @@ void GetSpawnInfo(
     CloseClipboard();
 }
 
-extern std::string gCurrentCheckpointName;
 void GetCurrentCheckpoint(
-    /* [in] */ handle_t IDL_handle,
     /* [string][in] */ int* Size,
     /* [string][in] */ unsigned char* pszString
 )
 {
-    idCmd::execute_command_text("mh_current_checkpoint");
+    if (*Size <= 0)
+        return;
+    APRuntimeSnapshot snapshot{};
+    mh_ap::get_runtime_snapshot(&snapshot);
     pszString[0] = 0;
-    strcpy_s((char*)pszString, *Size, gCurrentCheckpointName.c_str());
-    OutputDebugStringA("MH Interface current checkpoint: ");
-    OutputDebugStringA(gCurrentCheckpointName.c_str());
-    OutputDebugStringA("\n");
-
+    if (*Size > 0)
+        strcpy_s((char*)pszString, *Size, snapshot.checkpoint);
     *Size = (int)strlen((const char*)pszString);
+}
+
+void GetAPRuntimeInfo(
+    /* [out] */ APRuntimeInfo* info)
+{
+    mh_ap::get_runtime_info(info);
+}
+
+void GetRuntimeSnapshot(
+    /* [out] */ APRuntimeSnapshot* snapshot)
+{
+    mh_ap::get_runtime_snapshot(snapshot);
+}
+
+void ApplyDeathLink(
+    /* [string][in] */ char* request_id,
+    /* [out] */ APDeathLinkStatus* status)
+{
+    if (status == nullptr)
+        return;
+    *status = mh_ap::apply_deathlink(request_id);
+}
+
+void GetAPEventsSince(
+    /* [in] */ hyper after_sequence,
+    /* [in] */ unsigned long max_count,
+    /* [out] */ APEventBatch* batch)
+{
+    mh_ap::get_events_since(static_cast<std::uint64_t>(after_sequence), max_count, batch);
+}
+
+void GetInventoryItemCount(char* decl_name, APInventoryIntResult* result)
+{
+    mh_ap::get_inventory_item_count(decl_name, result);
+}
+
+void HasPlayerPerk(char* decl_name, APInventoryBoolResult* result)
+{
+    mh_ap::has_player_perk(decl_name, result);
+}
+
+void IsPlayerPerkActive(char* decl_name, APInventoryBoolResult* result)
+{
+    mh_ap::is_player_perk_active(decl_name, result);
+}
+
+void GetEquippedWeapon(APEquippedWeaponResult* result)
+{
+    mh_ap::get_equipped_weapon(result);
 }

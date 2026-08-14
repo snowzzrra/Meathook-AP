@@ -1,7 +1,8 @@
 //file meathook_interface.idl
 [
     uuid(1c9ca7c8-d421-482d-b85d-79fac33b2658),
-    version(1.0)
+    version(1.0),
+    implicit_handle(handle_t meathook_interface__MIDL_AutoBindHandle)
 ]
 interface meathook_interface
 {
@@ -13,4 +14,123 @@ interface meathook_interface
     void GetCurrentCheckpoint([in, out] int *Size, [out, size_is(*Size)] unsigned char * pBuffer );
     void GetSpawnInfo([in, out] int *Size, [out, size_is(*Size)] unsigned char * pBuffer);
     void KeepAlive([in, out] int *Size);
+
+    const unsigned long MH_AP_PROTOCOL_VERSION = 9;
+    cpp_quote("#define MEATHOOK_INTERFACE_AP_RUNTIME_TYPES_DEFINED")
+
+    typedef [public] enum APGameState {
+        AP_GAME_STATE_UNKNOWN = 0,
+        AP_GAME_STATE_MAIN_MENU = 1,
+        AP_GAME_STATE_LOADING = 2,
+        AP_GAME_STATE_GAMEPLAY = 3,
+        AP_GAME_STATE_PAUSED = 4
+    } APGameState;
+
+    typedef [public] struct APRuntimeInfo {
+        char runtime_name[32];
+        char runtime_version[32];
+        unsigned long protocol_version;
+        char game_build[64];
+        boolean build_supported;
+        boolean hooks_ready;
+        boolean capability_runtime_snapshot;
+        boolean capability_map;
+        boolean capability_game_state;
+        boolean capability_checkpoint;
+        boolean capability_native_deathlink;
+        boolean capability_native_events;
+        boolean capability_extra_life_telemetry;
+        boolean capability_inventory_read;
+    } APRuntimeInfo;
+
+    typedef [public] struct APRuntimeSnapshot {
+        hyper sequence;
+        // Unix epoch milliseconds.
+        hyper timestamp;
+        boolean runtime_ready;
+        boolean player_valid;
+        boolean dead_valid;
+        boolean dead;
+        boolean health_valid;
+        boolean max_health_valid;
+        float health;
+        float max_health;
+        APGameState game_state;
+        boolean game_state_valid;
+        boolean map_valid;
+        char map[128];
+        boolean checkpoint_valid;
+        char checkpoint[128];
+    } APRuntimeSnapshot;
+
+    void GetAPRuntimeInfo([out] APRuntimeInfo *info);
+    void GetRuntimeSnapshot([out] APRuntimeSnapshot *snapshot);
+
+    typedef [public] enum APDeathLinkStatus {
+        AP_DEATHLINK_QUEUED = 0,
+        AP_DEATHLINK_INVOKED = 1,
+        AP_DEATHLINK_UNAVAILABLE = 2,
+        AP_DEATHLINK_INVALID_PLAYER = 3,
+        AP_DEATHLINK_UNSUPPORTED = 4,
+        AP_DEATHLINK_ERROR = 5,
+        AP_DEATHLINK_INVALID = 6
+    } APDeathLinkStatus;
+
+    typedef [public] enum APEventType {
+        AP_EVENT_PLAYER_DEAD = 1,
+        AP_EVENT_PLAYER_RESPAWNED = 2,
+        AP_EVENT_DEATHLINK_INVOKED = 3
+    } APEventType;
+
+    typedef [public] struct APEvent {
+        hyper sequence;
+        APEventType type;
+        char request_id[64];
+    } APEvent;
+
+    typedef [public] struct APEventBatch {
+        unsigned long count;
+        hyper latest_sequence;
+        hyper oldest_sequence;
+        boolean gap;
+        APEvent events[128];
+    } APEventBatch;
+
+    void ApplyDeathLink([in, string] char request_id[64], [out] APDeathLinkStatus *status);
+    void GetAPEventsSince([in] hyper after_sequence, [in] unsigned long max_count, [out] APEventBatch *batch);
+
+    typedef [public] enum APInventoryStatus {
+        AP_INVENTORY_QUEUED = 0,
+        AP_INVENTORY_OK = 1,
+        AP_INVENTORY_UNSUPPORTED = 2,
+        AP_INVENTORY_INVALID_ARGUMENT = 3,
+        AP_INVENTORY_INVALID_PLAYER = 4,
+        AP_INVENTORY_ERROR = 5
+    } APInventoryStatus;
+
+    typedef [public] struct APInventoryIntResult {
+        APInventoryStatus status;
+        boolean valid;
+        long value;
+        char diagnostic[128];
+    } APInventoryIntResult;
+
+    typedef [public] struct APInventoryBoolResult {
+        APInventoryStatus status;
+        boolean valid;
+        boolean value;
+        char diagnostic[128];
+    } APInventoryBoolResult;
+
+    typedef [public] struct APEquippedWeaponResult {
+        APInventoryStatus status;
+        boolean valid;
+        char value[128];
+        char diagnostic[128];
+    } APEquippedWeaponResult;
+
+    void GetInventoryItemCount([in, string] char decl_name[128], [out] APInventoryIntResult *result);
+    void HasPlayerPerk([in, string] char decl_name[128], [out] APInventoryBoolResult *result);
+    void IsPlayerPerkActive([in, string] char decl_name[128], [out] APInventoryBoolResult *result);
+    void GetEquippedWeapon([out] APEquippedWeaponResult *result);
 }

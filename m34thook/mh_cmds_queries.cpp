@@ -214,7 +214,7 @@ void cmd_current_checkpoint(idCmdArgs* args)
 	sprintf_s(String, "Current checkpoint name %s\n", Name);
 	OutputDebugStringA(String);
 	idLib::Printf(String);
-	gCurrentCheckpointName = Name;
+	gCurrentCheckpointName = (Name[0] == '<') ? "" : Name;
 }
 
 static mh_fieldcached_t<char*> g_field_resourcelist_type{};

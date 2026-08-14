@@ -17,6 +17,7 @@
 #include "snaphakalgo.hpp"
 #include "mh_mainloop.hpp"
 #include "mh_guirender.hpp"
+#include "mh_ap_runtime.hpp"
 
 
 
@@ -84,6 +85,7 @@ static void run_firstframe_code()  {
 	g_isfirstframe = false;
 	//run the late stage scanners, load all plugins
 	meathook_final_init();	
+	mh_ap::initialize();
 	mh_gui::install_gui_hooks();
 }
 
@@ -108,6 +110,7 @@ void mh_mainloop::install_mainloop_hooks() {
 	*reinterpret_cast<void**>(descan::g_idCommonLocal_Frame_CallbackPtr) = (void*)meathook_game_frame;
 	g_preframe.init();
 	g_postframe.init();
+	mh_mainloop::add_preframe_callback([](void*) { mh_ap::pump(); }, nullptr);
 }
 
 void mh_mainloop::add_preframe_callback(frame_cb_t cb, void* ud) {

@@ -126,6 +126,9 @@
     <ClCompile Include="mh_mainloop.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="mh_ap_runtime.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
     <ClCompile Include="scanners\scanners_avx2.cpp">
       <Filter>Source Files\scanner_inls</Filter>
     </ClCompile>
@@ -300,6 +303,9 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="mh_mainloop.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="mh_ap_runtime.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="mhutil\mh_filesystem.hpp">
