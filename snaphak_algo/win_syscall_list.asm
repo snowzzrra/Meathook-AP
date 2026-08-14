@@ -2,6 +2,8 @@
 
 _text SEGMENT
 
+PUBLIC perform_syscall_impl
+
 ALIGN 8
 doswi PROC
 	mov r10, rcx

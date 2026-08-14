@@ -407,7 +407,7 @@ loc_1800324B0:
                 mov     rax, [rcx+rax*8+rb_node.rb_right]
                 ;mov     rdx, r14
                 mov     r8d, ebp
-                or      [rax+rb_node.rb_parent_color], 1
+                or      qword ptr [rax+rb_node.rb_parent_color], 1
                 and     byte ptr [rcx+rb_node.rb_parent_color], 0FEh
                 call    cs_rbnode_rotate_direction
                 mov     rcx, [r12+rbx*8+rb_node.rb_right]
@@ -423,7 +423,7 @@ loc_1800324CC:
                 ;mov     rdx, r14
                 mov     rax, [rcx+rbx*8+rb_node.rb_right]
                 mov     rcx, r12
-                or      [rax+rb_node.rb_parent_color], 1
+                or      qword ptr [rax+rb_node.rb_parent_color], 1
                 call    cs_rbnode_rotate_direction
                 mov     r15, [r14]
 loc_1800324FF:   
@@ -519,7 +519,7 @@ loc_180031FB0:
                 jnz     short loc_180031FB0
 loc_180032003: 
                 mov     rax, [r14]
-                or      [rax+rb_node.rb_parent_color], 1
+                or      qword ptr [rax+rb_node.rb_parent_color], 1
                 jmp     rest_low_gpregs_r10 ;tail call
                 ;call    rest_low_gpregs_r10
                 ;ret
